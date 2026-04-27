@@ -1,0 +1,122 @@
+{
+  "info": {
+    "_postman_id": "pg-optimizer-api-collection",
+    "name": "PG Optimizer API",
+    "description": "Postman collection for PG Optimizer Backend API - includes all endpoints for managing PG listings and generating recommendations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PG Management",
+      "description": "Endpoints for managing PG listings",
+      "item": [
+        {
+          "name": "Add New PG",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Comfort PG\",\n  \"area\": \"Whitefield\",\n  \"roomType\": \"Shared\",\n  \"rent\": 8000.0,\n  \"foodIncluded\": true,\n  \"latitude\": 13.0845,\n  \"longitude\": 77.6033\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pgs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pgs"
+              ]
+            },
+            "description": "Create a new PG listing with details including location coordinates"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All PGs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pgs/getAllPgs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pgs",
+                "getAllPgs"
+              ]
+            },
+            "description": "Retrieve all available PG listings"
+          },
+          "response": []
+        },
+        {
+          "name": "Get PG by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pgs/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pgs",
+                "1"
+              ]
+            },
+            "description": "Retrieve a specific PG listing by its ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "description": "Endpoints for generating PG recommendations based on commute optimization",
+      "item": [
+        {
+          "name": "Get PG Recommendations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"officeLocation\": \"MG Road\",\n  \"preferredArea\": \"Whitefield\",\n  \"budget\": 15000.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recommendations"
+              ]
+            },
+            "description": "Generate PG recommendations based on office location, preferred area, and budget"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
+

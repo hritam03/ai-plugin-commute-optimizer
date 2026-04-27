@@ -20,4 +20,8 @@ public class RecommendationResponseDTO {
     private Double distance;
 
     private Double score;
+
+    private String recommendationReason;
 }
+
+

@@ -5,13 +5,27 @@ public class ScoreCalculator {
     public static double calculateScore(
             double rent,
             double budget,
-            double distance
+            double distance,
+            int trafficScore,
+            int lifestyleScore
     ) {
 
-        double rentScore = (budget - rent) / budget;
+        double budgetScore =
+                (budget - rent) / budget;
 
-        double distanceScore = 1 / (1 + distance);
+        double commuteScore =
+                1 / (1 + distance);
 
-        return (0.7 * rentScore) + (0.3 * distanceScore);
+        double normalizedTraffic =
+                1 - (trafficScore / 10.0);
+
+        double normalizedLifestyle =
+                lifestyleScore / 10.0;
+
+        return
+                (0.4 * budgetScore)
+                        + (0.3 * commuteScore)
+                        + (0.2 * normalizedLifestyle)
+                        + (0.1 * normalizedTraffic);
     }
 }
