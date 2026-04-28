@@ -9,6 +9,9 @@ import com.pg.optimizer.repository.PgRepository;
 import com.pg.optimizer.service.PgService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,14 +38,22 @@ public class PgServiceImpl implements PgService {
     }
 
     @Override
-    public List<PgResponseDTO> getAllPgs() {
+    public Page<PgResponseDTO> getAllPgs(
+            int page,
+            int size
+    ) {
 
-        log.info("Fetching all PGs");
+        log.info(
+                "Fetching PGs with page: {} and size: {}",
+                page,
+                size
+        );
 
-        return pgRepository.findAll()
-                .stream()
-                .map(PgMapper::toResponseDTO)
-                .toList();
+        Pageable pageable =
+                PageRequest.of(page, size);
+
+        return pgRepository.findAll(pageable)
+                .map(PgMapper::toResponseDTO);
     }
 
     @Override

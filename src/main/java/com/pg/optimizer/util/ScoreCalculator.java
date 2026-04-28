@@ -7,25 +7,51 @@ public class ScoreCalculator {
             double budget,
             double distance,
             int trafficScore,
-            int lifestyleScore
+            int lifestyleScore,
+            boolean preferredAreaMatch
     ) {
 
+        /*
+         * Budget Score
+         */
         double budgetScore =
-                (budget - rent) / budget;
+                Math.max(
+                        0,
+                        (budget - rent) / budget
+                );
 
+        /*
+         * Commute Score
+         */
         double commuteScore =
                 1 / (1 + distance);
 
-        double normalizedTraffic =
-                1 - (trafficScore / 10.0);
-
-        double normalizedLifestyle =
+        /*
+         * Lifestyle Score
+         */
+        double lifestyleNormalized =
                 lifestyleScore / 10.0;
 
+        /*
+         * Traffic Penalty
+         */
+        double trafficPenalty =
+                trafficScore / 10.0;
+
+        /*
+         * Preferred Area Bonus
+         */
+        double preferredAreaBonus =
+                preferredAreaMatch ? 1.0 : 0.0;
+
+        /*
+         * Final Weighted Score
+         */
         return
-                (0.4 * budgetScore)
-                        + (0.3 * commuteScore)
-                        + (0.2 * normalizedLifestyle)
-                        + (0.1 * normalizedTraffic);
+                (0.35 * budgetScore)
+                        + (0.25 * commuteScore)
+                        + (0.20 * lifestyleNormalized)
+                        + (0.10 * preferredAreaBonus)
+                        - (0.10 * trafficPenalty);
     }
 }
