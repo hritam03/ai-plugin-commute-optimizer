@@ -6,6 +6,7 @@ import com.pg.optimizer.service.PgService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,10 +25,18 @@ public class PgController {
         return pgService.addPg(dto);
     }
 
-    @GetMapping("/getAllPgs")
-    public List<PgResponseDTO> getAllPgs() {
+    @GetMapping("/getAllPg")
+    public Page<PgResponseDTO> getAllPgs(
 
-        return pgService.getAllPgs();
+            @RequestParam(defaultValue = "0")
+            int page,
+
+            @RequestParam(defaultValue = "5")
+            int size
+
+    ) {
+
+        return pgService.getAllPgs(page, size);
     }
 
     @GetMapping("/{id}")
