@@ -1,15 +1,14 @@
 package com.pg.optimizer.controller;
 
 import com.pg.optimizer.dto.request.PgRequestDTO;
+import com.pg.optimizer.dto.response.PagedResponse;
 import com.pg.optimizer.dto.response.PgResponseDTO;
 import com.pg.optimizer.service.PgService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/pgs")
@@ -26,7 +25,7 @@ public class PgController {
     }
 
     @GetMapping("/getAllPg")
-    public Page<PgResponseDTO> getAllPgs(
+    public PagedResponse<PgResponseDTO> getAllPgs(
 
             @RequestParam(defaultValue = "0")
             int page,

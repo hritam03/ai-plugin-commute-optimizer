@@ -1,7 +1,11 @@
 package com.pg.optimizer.repository;
 
 import com.pg.optimizer.entity.Pg;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface PgRepository extends JpaRepository<Pg, Long> {
+
 }

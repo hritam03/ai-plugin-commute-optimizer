@@ -1,6 +1,7 @@
 package com.pg.optimizer.service.impl;
 
 import com.pg.optimizer.dto.request.PgRequestDTO;
+import com.pg.optimizer.dto.response.PagedResponse;
 import com.pg.optimizer.dto.response.PgResponseDTO;
 import com.pg.optimizer.entity.Pg;
 import com.pg.optimizer.exception.PgNotFoundException;
@@ -38,7 +39,7 @@ public class PgServiceImpl implements PgService {
     }
 
     @Override
-    public Page<PgResponseDTO> getAllPgs(
+    public PagedResponse<PgResponseDTO> getAllPgs(
             int page,
             int size
     ) {
@@ -52,8 +53,23 @@ public class PgServiceImpl implements PgService {
         Pageable pageable =
                 PageRequest.of(page, size);
 
-        return pgRepository.findAll(pageable)
-                .map(PgMapper::toResponseDTO);
+        Page<Pg> pgPage =
+                pgRepository.findAll(pageable);
+
+        List<PgResponseDTO> content =
+                pgPage.getContent()
+                        .stream()
+                        .map(PgMapper::toResponseDTO)
+                        .toList();
+
+        return PagedResponse.<PgResponseDTO>builder()
+                .content(content)
+                .pageNumber(pgPage.getNumber())
+                .pageSize(pgPage.getSize())
+                .totalElements(pgPage.getTotalElements())
+                .totalPages(pgPage.getTotalPages())
+                .last(pgPage.isLast())
+                .build();
     }
 
     @Override
