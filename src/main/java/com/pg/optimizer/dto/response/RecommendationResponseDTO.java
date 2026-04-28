@@ -21,7 +21,17 @@ public class RecommendationResponseDTO {
 
     private Double score;
 
+    private String budgetFit;
+
+    private String commuteBurden;
+
+    private String trafficInsight;
+
+    private String lifestyleFit;
+
     private String recommendationReason;
+
+    private String overallRecommendation;
 }
 
 
