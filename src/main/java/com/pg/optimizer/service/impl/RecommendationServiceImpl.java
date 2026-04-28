@@ -4,10 +4,14 @@ import com.pg.optimizer.dto.request.RecommendationRequestDTO;
 import com.pg.optimizer.dto.response.RecommendationResponseDTO;
 import com.pg.optimizer.entity.AreaMetadata;
 import com.pg.optimizer.entity.Pg;
+import com.pg.optimizer.exception.AreaNotFoundException;
+import com.pg.optimizer.exception.OfficeLocationNotFoundException;
+import com.pg.optimizer.repository.AreaMetadataRepository;
 import com.pg.optimizer.repository.PgRepository;
 import com.pg.optimizer.service.RecommendationService;
 import com.pg.optimizer.util.Constants;
 import com.pg.optimizer.util.DistanceCalculator;
+import com.pg.optimizer.util.RecommendationInsightGenerator;
 import com.pg.optimizer.util.ScoreCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +27,7 @@ public class RecommendationServiceImpl
         implements RecommendationService {
 
     private final PgRepository pgRepository;
+    private final AreaMetadataRepository areaMetadataRepository;
 
     @Override
     public List<RecommendationResponseDTO> recommend(
@@ -36,6 +41,9 @@ public class RecommendationServiceImpl
                         requestDTO.getOfficeLocation()
                 );
 
+        if(office == null){
+            throw new OfficeLocationNotFoundException("Invalid office location: " + requestDTO.getOfficeLocation());
+        }
         return pgRepository.findAll()
                 .stream()
                 .map(pg -> buildRecommendation(
@@ -58,7 +66,24 @@ public class RecommendationServiceImpl
     ) {
 
         AreaMetadata areaMetadata =
-                Constants.AREA_METADATA.get(pg.getArea());
+                areaMetadataRepository.findByAreaName(
+                        pg.getArea()
+                ).orElse(null);
+
+        if(areaMetadata == null){
+            throw new AreaNotFoundException(
+                    "Area metadata not found for area: "
+                            + pg.getArea()
+            );
+        }
+
+        boolean preferredAreaMatch =
+                requestDTO.getPreferredArea() != null
+                        &&
+                        requestDTO.getPreferredArea()
+                                .equalsIgnoreCase(
+                                        pg.getArea()
+                                );
 
         double distance =
                 DistanceCalculator.calculateDistance(
@@ -74,15 +99,59 @@ public class RecommendationServiceImpl
                         requestDTO.getBudget(),
                         distance,
                         areaMetadata.getTrafficScore(),
+                        areaMetadata.getLifestyleScore(),
+                        preferredAreaMatch
+                );
+
+        if(Double.isNaN(score) || Double.isInfinite(score)){
+
+            log.warn(
+                    "Score calculation resulted in invalid value for PG ID: {}",
+                    pg.getId()
+            );
+
+            score = 0.0;
+        }
+
+        // ✅ Generate Insights
+
+        String budgetFit =
+                RecommendationInsightGenerator.getBudgetFit(
+                        pg.getRent(),
+                        requestDTO.getBudget()
+                );
+
+        String commuteBurden =
+                RecommendationInsightGenerator.getCommuteBurden(
+                        distance
+                );
+
+        String trafficInsight =
+                RecommendationInsightGenerator.getTrafficInsight(
+                        areaMetadata.getTrafficScore()
+                );
+
+        String lifestyleFit =
+                RecommendationInsightGenerator.getLifestyleFit(
                         areaMetadata.getLifestyleScore()
                 );
 
         String recommendationReason =
-                buildRecommendationReason(
-                        requestDTO,
-                        areaMetadata,
-                        distance
+                RecommendationInsightGenerator.buildRecommendationReason(
+                        budgetFit,
+                        commuteBurden,
+                        trafficInsight
                 );
+
+        String overallRecommendation =
+                RecommendationInsightGenerator
+                        .buildOverallRecommendation(
+                                budgetFit,
+                                commuteBurden,
+                                lifestyleFit,
+                                requestDTO.getPreferredArea(),
+                                pg.getArea()
+                        );
 
         return RecommendationResponseDTO.builder()
                 .id(pg.getId())
@@ -92,33 +161,12 @@ public class RecommendationServiceImpl
                 .rent(pg.getRent())
                 .distance(distance)
                 .score(score)
+                .budgetFit(budgetFit)
+                .commuteBurden(commuteBurden)
+                .trafficInsight(trafficInsight)
+                .lifestyleFit(lifestyleFit)
                 .recommendationReason(recommendationReason)
+                .overallRecommendation(overallRecommendation)
                 .build();
-    }
-
-    private String buildRecommendationReason(
-            RecommendationRequestDTO requestDTO,
-            AreaMetadata areaMetadata,
-            double distance
-    ) {
-
-        if (requestDTO.getPreferredArea() != null
-                && requestDTO.getPreferredArea()
-                .equalsIgnoreCase(areaMetadata.getAreaName())) {
-
-            if (distance > 7) {
-
-                return "Preferred area has higher commute burden and traffic. Nearby areas may offer better daily travel experience.";
-            }
-
-            return "Preferred area matches well with office commute and lifestyle.";
-        }
-
-        if (distance < 5) {
-
-            return "Recommended due to shorter commute and balanced affordability.";
-        }
-
-        return "Recommended for better budget utilization despite moderate commute.";
     }
 }
