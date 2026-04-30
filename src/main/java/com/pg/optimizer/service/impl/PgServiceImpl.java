@@ -39,11 +39,9 @@ public class PgServiceImpl implements PgService {
     }
 
     @Override
-    public PagedResponse<PgResponseDTO> getAllPgs(
-            int page,
-            int size
-    ) {
-
+    public PagedResponse<PgResponseDTO> getAllPgs( int page, int size,
+                                                    String area, Double maxRent)
+    {
         log.info(
                 "Fetching PGs with page: {} and size: {}",
                 page,
@@ -53,8 +51,30 @@ public class PgServiceImpl implements PgService {
         Pageable pageable =
                 PageRequest.of(page, size);
 
-        Page<Pg> pgPage =
-                pgRepository.findAll(pageable);
+        Page<Pg> pgPage;
+
+        /*
+         * Filtering Logic
+         */
+        if(area!=null && maxRent!=null){
+            pgPage = pgRepository.findByAreaContainingIgnoreCaseAndRentLessThanEqual(
+                    area,
+                    maxRent,
+                    pageable
+            );
+        } else if(area!=null){
+            pgPage = pgRepository.findByAreaContainingIgnoreCase(
+                    area,
+                    pageable
+            );
+        } else if(maxRent!=null){
+            pgPage = pgRepository.findByRentLessThanEqual(
+                    maxRent,
+                    pageable
+            );
+        } else{
+            pgPage = pgRepository.findAll(pageable);
+        }
 
         List<PgResponseDTO> content =
                 pgPage.getContent()

@@ -26,16 +26,16 @@ public class PgController {
 
     @GetMapping("/getAllPg")
     public PagedResponse<PgResponseDTO> getAllPgs(
-
-            @RequestParam(defaultValue = "0")
-            int page,
-
-            @RequestParam(defaultValue = "5")
-            int size
-
-    ) {
-
-        return pgService.getAllPgs(page, size);
+                    @RequestParam(defaultValue = "0")
+                    int page,
+                    @RequestParam(defaultValue = "5")
+                    int size,
+                    @RequestParam(required = false)
+                    String area,
+                    @RequestParam(required = false)
+                    Double maxRent )
+    {
+        return pgService.getAllPgs(page, size, area, maxRent);
     }
 
     @GetMapping("/{id}")
