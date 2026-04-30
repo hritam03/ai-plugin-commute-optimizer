@@ -1,6 +1,7 @@
 package com.pg.optimizer.controller;
 
 import com.pg.optimizer.dto.request.PgRequestDTO;
+import com.pg.optimizer.dto.response.ApiResponse;
 import com.pg.optimizer.dto.response.PagedResponse;
 import com.pg.optimizer.dto.response.PgResponseDTO;
 import com.pg.optimizer.service.PgService;
@@ -8,6 +9,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+
 
 
 @RestController
@@ -19,29 +23,49 @@ public class PgController {
     private final PgService pgService;
 
     @PostMapping
-    public PgResponseDTO addPg(@Valid @RequestBody PgRequestDTO dto) {
+    public ApiResponse<PgResponseDTO> addPg(@Valid @RequestBody PgRequestDTO dto) {
 
-        return pgService.addPg(dto);
+        PgResponseDTO response = pgService.addPg(dto);
+
+        return ApiResponse.<PgResponseDTO>builder()
+                .success(true)
+                .message("PG created successfully")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
     }
 
     @GetMapping("/getAllPg")
-    public PagedResponse<PgResponseDTO> getAllPgs(
+    public ApiResponse<PagedResponse<PgResponseDTO>> getAllPgs(
+                    @RequestParam(defaultValue = "0")
+                    int page,
+                    @RequestParam(defaultValue = "5")
+                    int size,
+                    @RequestParam(required = false)
+                    String area,
+                    @RequestParam(required = false)
+                    Double maxRent )
+    {
+        PagedResponse<PgResponseDTO> response = pgService.getAllPgs(page, size, area, maxRent);
 
-            @RequestParam(defaultValue = "0")
-            int page,
-
-            @RequestParam(defaultValue = "5")
-            int size
-
-    ) {
-
-        return pgService.getAllPgs(page, size);
+        return ApiResponse.<PagedResponse<PgResponseDTO>>builder()
+                .success(true)
+                .message("PGs fetched successfully")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
     }
 
     @GetMapping("/{id}")
-    public PgResponseDTO getPgById(@PathVariable Long id) {
+    public ApiResponse<PgResponseDTO> getPgById(@PathVariable Long id) {
 
-        return pgService.getPgById(id);
+       PgResponseDTO response = pgService.getPgById(id);
+        return ApiResponse.<PgResponseDTO>builder()
+                .success(true)
+                .message("PG fetched successfully")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
     }
 }
 
