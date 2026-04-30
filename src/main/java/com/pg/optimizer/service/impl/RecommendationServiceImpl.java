@@ -9,10 +9,7 @@ import com.pg.optimizer.exception.OfficeLocationNotFoundException;
 import com.pg.optimizer.repository.AreaMetadataRepository;
 import com.pg.optimizer.repository.PgRepository;
 import com.pg.optimizer.service.RecommendationService;
-import com.pg.optimizer.util.Constants;
-import com.pg.optimizer.util.DistanceCalculator;
-import com.pg.optimizer.util.RecommendationInsightGenerator;
-import com.pg.optimizer.util.ScoreCalculator;
+import com.pg.optimizer.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -153,6 +150,17 @@ public class RecommendationServiceImpl
                                 pg.getArea()
                         );
 
+        List<RecommendationLabel> labels =
+                RecommendationLabelGenerator.generateLabels(
+
+                        pg.getRent(),
+                        requestDTO.getBudget(),
+                        distance,
+                        areaMetadata.getTrafficScore(),
+                        areaMetadata.getLifestyleScore(),
+                        preferredAreaMatch
+                );
+
         return RecommendationResponseDTO.builder()
                 .id(pg.getId())
                 .name(pg.getName())
@@ -167,6 +175,7 @@ public class RecommendationServiceImpl
                 .lifestyleFit(lifestyleFit)
                 .recommendationReason(recommendationReason)
                 .overallRecommendation(overallRecommendation)
+                .labels(labels)
                 .build();
     }
 }
