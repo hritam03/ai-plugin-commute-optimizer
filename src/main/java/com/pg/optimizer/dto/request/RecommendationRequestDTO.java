@@ -1,16 +1,16 @@
 package com.pg.optimizer.dto.request;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class RecommendationRequestDTO {
 
-    @NotNull
-    private Double officeLatitude;
+    @NotBlank(message = "Office location is required")
+    private String officeLocation;
 
-    @NotNull
-    private Double officeLongitude;
+    private String preferredArea;
 
-    @NotNull
+    @NotNull(message = "Budget is required")
     private Double budget;
 }
