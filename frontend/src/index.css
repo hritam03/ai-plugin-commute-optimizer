@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-5 border border-gray-100;
+  }
+
+  .btn-primary {
+    @apply bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition-all duration-200 font-medium;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 rounded-lg px-4 py-2 hover:bg-gray-200 transition-all duration-200 font-medium;
+  }
+
+  .input-field {
+    @apply w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all duration-200;
+  }
+
+  .label-badge {
+    @apply text-xs px-2 py-1 rounded font-medium inline-flex items-center;
+  }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
