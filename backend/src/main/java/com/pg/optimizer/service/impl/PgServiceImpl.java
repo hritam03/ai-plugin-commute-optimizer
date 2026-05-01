@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class PgServiceImpl implements PgService {
 
 
     @Override
+    @CacheEvict(value = "pgs", allEntries = true)
     public PgResponseDTO addPg(PgRequestDTO dto) {
         log.info("Adding PG: {}", dto.getName());
 
@@ -39,6 +42,10 @@ public class PgServiceImpl implements PgService {
     }
 
     @Override
+    @Cacheable(
+            value = "pgs",
+            key = "#page + '-' + #size + '-' + #area + '-' + #maxRent"
+    )
     public PagedResponse<PgResponseDTO> getAllPgs( int page, int size,
                                                     String area, Double maxRent)
     {
@@ -93,6 +100,7 @@ public class PgServiceImpl implements PgService {
     }
 
     @Override
+    @Cacheable(value = "pgs", key = "#id")
     public PgResponseDTO getPgById(Long id) {
 
         log.info("Fetching PG with ID: {}", id);
