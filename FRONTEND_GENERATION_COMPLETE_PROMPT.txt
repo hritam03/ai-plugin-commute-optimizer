@@ -1,0 +1,740 @@
+# PG Optimizer Frontend Generation - Complete Prompt Template
+
+## 🎯 Copy-Paste This Entire Prompt Into Claude, ChatGPT, GitHub Copilot, or Any AI Code Generator
+
+---
+
+## SYSTEM INSTRUCTION
+
+You are an expert React developer with extensive experience in building production-ready web applications. You will create a complete React frontend application using Vite, React 18, Tailwind CSS, and Axios for API integration.
+
+The application will interact with a Spring Boot REST API backend running at `http://localhost:8080`.
+
+---
+
+## PROJECT REQUIREMENTS
+
+### Project Name
+**PG Optimizer Frontend** - A React-based web application for browsing and recommending Paying Guest (PG) accommodations in Bangalore.
+
+### Core Features
+1. **Browse & Search PGs** - Display all available PG listings with pagination and filtering
+2. **Add New PG** - Create new PG listings via form submission
+3. **Smart Recommendations** - Generate AI-driven PG recommendations based on office location, preferred area, and budget
+4. **View Details** - See comprehensive information about specific PG listings
+
+### Tech Stack
+- **Frontend Framework**: React 18 with Vite
+- **HTTP Client**: Axios
+- **Styling**: Tailwind CSS
+- **Routing**: React Router v6
+- **Icons**: React Icons (optional)
+- **State Management**: React Context API
+
+---
+
+## BACKEND API SPECIFICATIONS
+
+### Base Configuration
+- **API Base URL**: `http://localhost:8080`
+- **CORS Enabled**: Yes, for `http://localhost:5173`
+- **Content-Type**: `application/json`
+
+### API Response Format
+All API endpoints (except recommendations) return responses in this format:
+```javascript
+{
+  success: boolean,
+  message: string,
+  data: any,
+  timestamp: string (ISO 8601)
+}
+```
+
+### Endpoints
+
+#### 1. Create PG Listing
+```
+POST /pgs
+Request:
+{
+  "name": "string (required)",
+  "area": "string (required)",
+  "roomType": "string (required)",
+  "rent": number (required),
+  "foodIncluded": boolean (required),
+  "latitude": number (required),
+  "longitude": number (required)
+}
+
+Response (Success - 200):
+{
+  "success": true,
+  "message": "PG created successfully",
+  "data": {
+    "id": number,
+    "name": string,
+    "area": string,
+    "roomType": string,
+    "rent": number,
+    "foodIncluded": boolean
+  },
+  "timestamp": string
+}
+
+Response (Error - 400):
+{
+  "success": false,
+  "message": "Field validation error message",
+  "data": null,
+  "timestamp": string
+}
+```
+
+#### 2. Get All PGs with Pagination
+```
+GET /pgs/getAllPgs?page=0&size=5&area=Whitefield&maxRent=15000
+
+Query Parameters:
+- page: number (default: 0, zero-indexed)
+- size: number (default: 5)
+- area: string (optional, filter by area name)
+- maxRent: number (optional, filter by maximum rent)
+
+Response (Success - 200):
+{
+  "success": true,
+  "message": "PGs fetched successfully",
+  "data": {
+    "content": [
+      {
+        "id": number,
+        "name": string,
+        "area": string,
+        "roomType": string,
+        "rent": number,
+        "foodIncluded": boolean
+      }
+    ],
+    "pageNumber": number,
+    "pageSize": number,
+    "totalElements": number,
+    "totalPages": number,
+    "last": boolean
+  },
+  "timestamp": string
+}
+```
+
+#### 3. Get PG by ID
+```
+GET /pgs/{id}
+
+Response (Success - 200):
+{
+  "success": true,
+  "message": "PG fetched successfully",
+  "data": {
+    "id": number,
+    "name": string,
+    "area": string,
+    "roomType": string,
+    "rent": number,
+    "foodIncluded": boolean
+  },
+  "timestamp": string
+}
+
+Response (Error - 404):
+{
+  "success": false,
+  "message": "PG not found",
+  "data": null,
+  "timestamp": string
+}
+```
+
+#### 4. Get PG Recommendations
+```
+POST /recommendations
+Request:
+{
+  "officeLocation": "string (required)",
+  "preferredArea": "string (optional)",
+  "budget": number (required)
+}
+
+Supported Office Locations:
+- Ecospace
+- Manyata Tech Park
+- Bagmane Tech Park
+
+Response (Success - 200):
+Returns array of recommendation objects (NOT wrapped in standard response format):
+[
+  {
+    "id": number,
+    "name": string,
+    "area": string,
+    "roomType": string,
+    "rent": number,
+    "distance": number (km),
+    "score": number (0-100),
+    "budgetFit": string,
+    "commuteBurden": string (LOW, MODERATE, HIGH),
+    "trafficInsight": string,
+    "lifestyleFit": string,
+    "recommendationReason": string,
+    "overallRecommendation": string,
+    "labels": array of strings
+  },
+  ...
+]
+
+Possible Label Values:
+- BEST_BUDGET_CHOICE
+- BEST_LIFESTYLE_CHOICE
+- BEST_COMMUTE_CHOICE
+- TRAFFIC_HEAVY_AREA
+- PREFERRED_AREA_MATCH
+
+Response (Error - 400):
+{
+  "success": false,
+  "message": "error message",
+  "data": null,
+  "timestamp": string
+}
+```
+
+---
+
+## UI/UX REQUIREMENTS
+
+### Pages to Create
+
+#### 1. Home Page (`/`)
+- Welcome section with application description
+- Three main action buttons:
+  - "Browse PGs" → links to /browse
+  - "Add New PG" → links to /add-pg
+  - "Get Recommendations" → links to /recommendations
+- Display some statistics (total PGs, office locations)
+- Professional and clean design
+
+#### 2. Browse PGs Page (`/browse`)
+- List all PG listings in a grid of cards
+- Each card displays: name, area, room type, rent, food included status, click to see details
+- **Sidebar/Top Filters**:
+  - Area dropdown (optional)
+  - Max Rent slider or input
+  - Apply Filters button
+- **Pagination Controls** at bottom:
+  - Page number, Previous/Next buttons
+  - Items per page selector (5, 10, 15, 20)
+- **Loading State**: Spinner while fetching
+- **Error State**: Error message with retry button
+- **Empty State**: Message when no PGs found
+- Click on card to view full details in modal or navigate to details page
+
+#### 3. Add PG Page (`/add-pg`)
+- Form with fields:
+  - Name (text input, required, placeholder "e.g., Comfort PG")
+  - Area (text input, required, placeholder "e.g., Whitefield")
+  - Room Type (dropdown: Shared, Single, Double, required)
+  - Rent (number input, required, min 0)
+  - Food Included (toggle switch, required)
+  - Latitude (number input, required, placeholder "e.g., 13.0845")
+  - Longitude (number input, required, placeholder "e.g., 77.6033")
+- **Location Picker** (optional): Google Maps integration to pick latitude/longitude
+- Form Validation:
+  - Show validation errors below each field
+  - Disable submit button if form invalid
+  - Provide helpful error messages
+- Submit Button: "Create PG Listing"
+- Success Notification: Toast showing "PG created successfully"
+- After success: Clear form or redirect to /browse
+- Error Notification: Show error message if submission fails
+
+#### 4. Recommendations Page (`/recommendations`)
+- Input form with fields:
+  - Office Location (required dropdown):
+    - Ecospace
+    - Manyata Tech Park
+    - Bagmane Tech Park
+  - Preferred Area (optional text input)
+  - Budget (required number input)
+- "Get Recommendations" button
+- **Results Display**:
+  - Show list/cards of recommended PGs
+  - Sort by score (highest first)
+  - For each recommendation show:
+    - PG name, area, room type, rent
+    - Distance from office
+    - Recommendation score (visual progress bar 0-100)
+    - Budget fit label
+    - Commute burden indicator
+    - Recommendation labels (tags/badges)
+    - Truncated reason text with "read more" option
+- **Loading State**: Show spinner while fetching recommendations
+- **Error State**: Show error message with retry option
+- **Empty State**: Friendly message if no recommendations
+
+#### 5. PG Details Page/Modal (`/pg/:id`)
+- Full PG information:
+  - Name, Area, Room Type, Rent
+  - Food Included status
+  - Latitude, Longitude
+- **Map View** (optional):
+  - Display PG location on map using Google Maps API
+  - Show office locations as comparison
+- **Related Actions**:
+  - "Get Recommendations for this Area" button (pre-fills area in recommendations page)
+  - "Back to Browse" link
+
+### Navigation
+- **Header/Navbar**:
+  - Logo/App name "PG Optimizer"
+  - Navigation links: Home, Browse, Add PG, Recommendations
+  - Mobile hamburger menu
+  - Responsive design
+
+### Design System
+- **Framework**: Tailwind CSS
+- **Color Palette**:
+  - Primary: Blue (#3B82F6 or similar)
+  - Secondary: Green (#10B981)
+  - Accent: Orange (#F59E0B)
+  - Background: Light gray (#F9FAFB)
+  - Text: Dark gray (#1F2937)
+  - Success: Green (#10B981)
+  - Error: Red (#EF4444)
+  - Warning: Yellow (#F59E0B)
+
+- **Typography**:
+  - Font: Default Tailwind (system fonts) or custom sans-serif
+  - Heading 1: 2.25rem (bold)
+  - Heading 2: 1.875rem (bold)
+  - Body: 1rem (regular)
+  - Small: 0.875rem
+
+- **Components**:
+  - Cards with subtle shadows and hover effects
+  - Buttons with consistent styling and hover states
+  - Input fields with focus states
+  - Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop
+  - Consistent padding and spacing
+
+- **Responsive Breakpoints**:
+  - Mobile: 320px - 639px
+  - Tablet: 640px - 1023px
+  - Desktop: 1024px+
+
+---
+
+## IMPLEMENTATION DETAILS
+
+### Project Structure
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── PGCard.jsx
+│   │   ├── PGForm.jsx
+│   │   ├── FilterPanel.jsx
+│   │   ├── Pagination.jsx
+│   │   ├── LoadingSpinner.jsx
+│   │   ├── Toast.jsx
+│   │   ├── RecommendationCard.jsx
+│   │   └── ConfirmDialog.jsx
+│   ├── pages/
+│   │   ├── Home.jsx
+│   │   ├── BrowsePGs.jsx
+│   │   ├── AddPG.jsx
+│   │   ├── Recommendations.jsx
+│   │   ├── PGDetails.jsx
+│   │   └── NotFound.jsx
+│   ├── services/
+│   │   └── api.js
+│   ├── context/
+│   │   └── AppContext.js
+│   ├── hooks/
+│   │   ├── useFetch.js
+│   │   └── useForm.js
+│   ├── utils/
+│   │   └── constants.js
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   └── main.jsx
+├── public/
+│   └── index.html
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+└── postcss.config.js
+```
+
+### Axios Service (src/services/api.js)
+```javascript
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:8080';
+
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Error interceptor
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle errors consistently
+    if (error.response?.status === 404) {
+      error.message = 'Resource not found';
+    } else if (error.response?.status === 400) {
+      error.message = error.response.data?.message || 'Invalid request';
+    } else if (!error.response) {
+      error.message = 'Network error. Please check your connection.';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const pgApi = {
+  // Create new PG
+  createPg: (data) => axiosInstance.post('/pgs', data),
+
+  // Get all PGs with filters and pagination
+  getAllPgs: (page = 0, size = 5, area = null, maxRent = null) => {
+    const params = { page, size };
+    if (area) params.area = area;
+    if (maxRent) params.maxRent = maxRent;
+    return axiosInstance.get('/pgs/getAllPgs', { params });
+  },
+
+  // Get specific PG by ID
+  getPgById: (id) => axiosInstance.get(`/pgs/${id}`),
+
+  // Get recommendations
+  getRecommendations: (officeLocation, preferredArea = '', budget) =>
+    axiosInstance.post('/recommendations', {
+      officeLocation,
+      preferredArea,
+      budget,
+    }),
+};
+
+export default axiosInstance;
+```
+
+### Custom Hooks
+
+#### useFetch Hook (src/hooks/useFetch.js)
+```javascript
+// Fetch data and manage loading/error states
+import { useState, useEffect } from 'react';
+
+export const useFetch = (apiCall, dependencies = []) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    apiCall()
+      .then((response) => {
+        // Handle wrapped response format
+        if (response.data?.success !== false) {
+          setData(response.data);
+        } else {
+          setError(response.data.message);
+        }
+      })
+      .catch((err) => {
+        setError(err.message || 'Something went wrong');
+      })
+      .finally(() => setLoading(false));
+  }, dependencies);
+
+  return { data, loading, error };
+};
+```
+
+#### useForm Hook (src/hooks/useForm.js)
+```javascript
+// Manage form state, validation, and submission
+import { useState } from 'react';
+
+export const useForm = (initialValues, onSubmit) => {
+  const [values, setValues] = useState(initialValues);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setValues({
+      ...values,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched({ ...touched, [name]: true });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await onSubmit(values);
+    } catch (err) {
+      setErrors({ submit: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setValues(initialValues);
+    setErrors({});
+    setTouched({});
+  };
+
+  return {
+    values,
+    errors,
+    touched,
+    loading,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    setValues,
+    setErrors,
+    resetForm,
+  };
+};
+```
+
+### Constants (src/utils/constants.js)
+```javascript
+export const OFFICE_LOCATIONS = [
+  { label: 'Ecospace', value: 'Ecospace' },
+  { label: 'Manyata Tech Park', value: 'Manyata Tech Park' },
+  { label: 'Bagmane Tech Park', value: 'Bagmane Tech Park' },
+];
+
+export const ROOM_TYPES = [
+  { label: 'Shared', value: 'Shared' },
+  { label: 'Single', value: 'Single' },
+  { label: 'Double', value: 'Double' },
+];
+
+export const RECOMMENDATION_LABELS = {
+  BEST_BUDGET_CHOICE: { color: 'green', text: 'Best Budget Choice' },
+  BEST_LIFESTYLE_CHOICE: { color: 'blue', text: 'Best Lifestyle' },
+  BEST_COMMUTE_CHOICE: { color: 'purple', text: 'Best Commute' },
+  TRAFFIC_HEAVY_AREA: { color: 'red', text: 'High Traffic Area' },
+  PREFERRED_AREA_MATCH: { color: 'orange', text: 'Preferred Area' },
+};
+```
+
+### Error Handling Pattern
+- Use try-catch blocks in async functions
+- Display user-friendly error messages
+- Implement retry mechanisms where appropriate
+- Log errors to console in development
+- Show errors in toast notifications
+
+### State Management (Using React Context)
+```javascript
+// src/context/AppContext.js
+import React, { createContext, useState } from 'react';
+
+export const AppContext = createContext();
+
+export const AppProvider = ({ children }) => {
+  const [toast, setToast] = useState(null);
+  const [filters, setFilters] = useState({ area: '', maxRent: '' });
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  return (
+    <AppContext.Provider value={{ toast, showToast, filters, setFilters }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+```
+
+---
+
+## FEATURES & FUNCTIONALITY
+
+### PG Browse Page Features
+- [x] Display PGs in responsive grid layout
+- [x] Pagination (previous/next, page selector)
+- [x] Filter by area (dropdown with area options)
+- [x] Filter by max rent (input with debounce)
+- [x] Loading skeleton or spinner
+- [x] Error message with retry
+- [x] Empty state message
+- [x] Click card to view details
+
+### Add PG Page Features
+- [x] Form validation (all fields required, proper types)
+- [x] Show validation errors inline
+- [x] Clear form button
+- [x] Submit button (disabled while loading)
+- [x] Success toast notification
+- [x] Error handling with retry
+- [x] Pre-fill area from dropdown (optional)
+
+### Recommendations Page Features
+- [x] Office location dropdown (required)
+- [x] Preferred area text input (optional)
+- [x] Budget number input (required)
+- [x] Form validation
+- [x] Display results sorted by score
+- [x] Show recommendation score with progress bar
+- [x] Display labels as badges/tags
+- [x] Show distance, budget fit, commute burden
+- [x] Expandable reason text
+- [x] Loading state
+- [x] Error handling
+
+### Shared Features
+- [x] Responsive design (mobile-first)
+- [x] Toast notification system
+- [x] Loading spinners
+- [x] Error messages with retry
+- [x] Form validation and feedback
+- [x] Navigation between pages
+- [x] Consistent styling with Tailwind CSS
+
+---
+
+## SETUP INSTRUCTIONS
+
+### Installation
+```bash
+# Create Vite project
+npm create vite@latest pg-optimizer-frontend -- --template react
+
+# Install dependencies
+cd pg-optimizer-frontend
+npm install axios react-router-dom react-icons
+
+# Install Tailwind CSS
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+# Start development server
+npm run dev
+```
+
+### Configuration Files
+
+**tailwind.config.js**
+```javascript
+export default {
+  content: ['./index.html', './src/**/*.{js,jsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+**vite.config.js**
+```javascript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    strictPort: false,
+  },
+});
+```
+
+---
+
+## TESTING RECOMMENDATIONS
+
+### Manual Testing Checklist
+- [ ] Browse PGs page loads correctly
+- [ ] Pagination works (navigate pages, change items per page)
+- [ ] Filters work (area filter, rent filter)
+- [ ] Adding new PG works with valid data
+- [ ] Form validation prevents invalid submissions
+- [ ] Recommendations display for valid office location + budget
+- [ ] Clicking on PG card shows details
+- [ ] Responsive design works on mobile/tablet/desktop
+- [ ] Error messages display correctly
+- [ ] Toast notifications appear and disappear
+- [ ] Network errors handled gracefully
+
+---
+
+## DEPLOYMENT
+
+### Build
+```bash
+npm run build
+```
+
+### Output
+- Build output in `dist/` folder
+- Ready for deployment to any static hosting (Vercel, Netlify, GitHub Pages, etc.)
+
+### Environment Variables (if needed)
+Create `.env` file:
+```
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+Update API service to use:
+```javascript
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+```
+
+---
+
+## ADDITIONAL NOTES
+
+1. **CORS**: Already configured on backend for `http://localhost:5173`
+2. **API Response Format**: All endpoints except `/recommendations` return wrapped format with success/message/data/timestamp
+3. **Recommendation Endpoint**: Returns array directly without wrapping
+4. **Office Locations**: Must be exact strings: "Ecospace", "Manyata Tech Park", "Bagmane Tech Park"
+5. **Distance**: Calculated server-side using haversine formula (in km)
+6. **Scores**: 0-100 scale based on multiple factors
+7. **Timestamps**: ISO 8601 format
+8. **Mobile Design**: Ensure responsive layout, touch-friendly buttons (min 44x44px)
+9. **Accessibility**: Use semantic HTML, proper ARIA labels, sufficient color contrast
+10. **Performance**: Lazy load images, debounce filters, implement pagination
+
+---
+
+## 🎉 END OF PROMPT
+
+**You can now paste this entire prompt into any AI code generator (Claude, ChatGPT, GitHub Copilot, etc.) to generate a complete, production-ready React frontend for the PG Optimizer application!**
+
+For additional context, refer to:
+- `FRONTEND_GENERATION_PROMPT.md` - Detailed specifications
+- `FRONTEND_QUICK_REFERENCE.md` - Quick API reference
+- Backend Swagger UI: `http://localhost:8080/swagger-ui.html`
+
