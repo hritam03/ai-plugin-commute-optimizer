@@ -111,7 +111,6 @@ public class RecommendationServiceImpl
         }
 
         // ✅ Generate Insights
-
         String budgetFit =
                 RecommendationInsightGenerator.getBudgetFit(
                         pg.getRent(),
